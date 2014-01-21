@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BC6D86FD-926B-4EB4-964D-2B8EB321D637}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>CarMediaServer</RootNamespace>
+    <AssemblyName>CarMediaServer</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Mono.Posix" />
+    <Reference Include="System.Core" />
+    <Reference Include="log4net">
+      <HintPath>..\..\..\Downloads\Carputer\Hub\bin\Debug\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="MySql.Data">
+      <HintPath>..\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\Downloads\Json50r8\Bin\Net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Main.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="MountManager.cs" />
+    <Compile Include="MountedDevice.cs" />
+    <Compile Include="MountedDeviceEventArgs.cs" />
+    <Compile Include="Data\Factory.cs" />
+    <Compile Include="Data\DatabaseCache.cs" />
+    <Compile Include="Data\DataObjectInformation.cs" />
+    <Compile Include="Data\AudioFileFactory.cs" />
+    <Compile Include="DataObjects\DbObject.cs" />
+    <Compile Include="DataObjects\AudioFile.cs" />
+    <Compile Include="DataObjects\DataObjectAttribute.cs" />
+    <Compile Include="DataObjects\DataPropertyMappingAttribute.cs" />
+    <Compile Include="Core\Logger.cs" />
+    <Compile Include="NetworkServer\ClientConnection.cs" />
+    <Compile Include="NetworkServer\CommandClientConnection.cs" />
+    <Compile Include="NetworkServer\CommandNetworkServer.cs" />
+    <Compile Include="NetworkServer\NotificationClientConnection.cs" />
+    <Compile Include="NetworkServer\NotificationNetworkServer.cs" />
+    <Compile Include="NetworkServer\TcpServer.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\CommandProcessor.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\EchoCommandProcessor.cs" />
+    <Compile Include="NetworkCommands\Command.cs" />
+    <Compile Include="NetworkCommands\CommandCategories.cs" />
+    <Compile Include="NetworkCommands\INetworkNotification.cs" />
+    <Compile Include="NetworkCommands\INetworkSerialisableException.cs" />
+    <Compile Include="NetworkCommands\NetworkErrorMessage.cs" />
+    <Compile Include="NetworkCommands\NetworkNotification.cs" />
+    <Compile Include="NetworkCommands\NetworkSeriaisableException.cs" />
+    <Compile Include="NetworkCommands\NotificationCategories.cs" />
+    <Compile Include="NetworkCommands\Diagnostics\DiagnosticCommand.cs" />
+    <Compile Include="NetworkCommands\Diagnostics\DiagnosticCommands.cs" />
+    <Compile Include="NetworkCommands\Diagnostics\EchoCommand.cs" />
+    <Compile Include="NetworkCommands\Diagnostics\EchoRequest.cs" />
+    <Compile Include="Core\Configuration.cs" />
+    <Compile Include="NetworkServer\DiscoveryBroadcaster.cs" />
+    <Compile Include="NetworkCommands\Audio\AudioCommand.cs" />
+    <Compile Include="NetworkCommands\Audio\AudioCommands.cs" />
+    <Compile Include="NetworkCommands\EmptyCommand.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\AudioLibraryGetCommandProcessor.cs" />
+    <Compile Include="Core\Controller.cs" />
+    <Compile Include="Audio\AudioFileDiscoverer.cs" />
+    <Compile Include="Audio\AudioPlayer.cs" />
+    <Compile Include="NetworkCommands\Audio\PlaylistQueueRequest.cs" />
+    <Compile Include="NetworkCommands\Audio\PlaylistQueue.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\PlaylistQueueCommandProcessor.cs" />
+    <Compile Include="NetworkCommands\Audio\AudioStatusNotification.cs" />
+    <Compile Include="NetworkCommands\Audio\PlaylistJump.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\PlaylistJumpCommandProcessor.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\PauseToggleCommandProcessor.cs" />
+    <Compile Include="NetworkCommands\Audio\TrackJump.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\TrackJumpCommandProcessor.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\PlaylistNextCommandProcessor.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\PlaylistPreviousCommandProcessor.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\ToggleShuffleCommandProcessor.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\ToggleRepeatCommandProcessor.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Data\" />
+    <Folder Include="DataObjects\" />
+    <Folder Include="Core\" />
+    <Folder Include="NetworkServer\" />
+    <Folder Include="NetworkServer\CommandProcessors\" />
+    <Folder Include="NetworkCommands\" />
+    <Folder Include="NetworkCommands\Diagnostics\" />
+    <Folder Include="NetworkCommands\Audio\" />
+    <Folder Include="Audio\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+</Project>
