@@ -46,17 +46,40 @@ namespace CarMediaServer
         /// <summary>
         /// Defines the cache for the current data object.
         /// </summary>
-        private DatabaseCache<TDbObject, TPrimaryKey> _cache;
+        internal DatabaseCache<TDbObject, TPrimaryKey> _cache;
 
         /// <summary>
         /// Static constructor for database objects which enumerates all loaded assemblies to setup the data environment.
         /// </summary>
         static Factory()
-        {
-            // Inspect the type of DB object and construct a column list, a column mapping for
-            // all DbObject types that are loaded.
-            Type type = typeof(DbObject);
-            IEnumerable<Type> types = AppDomain.CurrentDomain.GetAssemblies().ToList().SelectMany(s => s.GetTypes()).Where(p => type.IsAssignableFrom(p)).Where(p => !p.IsAbstract);
+		{
+			// Inspect the type of DB object and construct a column list, a column mapping for
+			// all DbObject types that are loaded.
+			Type type = typeof(DbObject);
+
+			List<Type> types = new List<Type>();
+			foreach (Assembly ass in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				try
+				{
+					Type[] assemblyTypes = ass.GetTypes();
+					foreach (Type assemblyType in assemblyTypes)
+					{
+						try
+						{
+							if ((type.IsAssignableFrom(assemblyType)) && (!assemblyType.IsAbstract))
+							     types.Add(assemblyType);
+						}
+					    catch
+					    {
+						}
+					}
+				}
+				catch
+				{
+				}
+
+			}
             foreach (Type t in types)
             {
                 object[] classAttributes = t.GetCustomAttributes(typeof(DataObjectAttribute), true);
@@ -305,7 +328,7 @@ namespace CarMediaServer
         /// <param name="obj">
         /// The object to update in the database.
         /// </param>
-        public void Update(TDbObject obj)
+        public void Update(TDbObject obj, bool useCache = true)
         {
             MySqlConnection conn = null;
             try
@@ -340,10 +363,13 @@ namespace CarMediaServer
                 command.ExecuteNonQuery();
 
                 // Update cache
-                Logger.Debug(_type + " re-caching object");
-                _cache.InvalidateCache(obj);
-                _cache.CacheObject(obj);
-                Logger.Debug(_type + " completed update");
+				if (useCache)
+				{
+    	            Logger.Debug(_type + " re-caching object");
+                	_cache.InvalidateCache(obj);
+                	_cache.CacheObject(obj);
+	                Logger.Debug(_type + " completed update");
+				}
             }
             finally
             {

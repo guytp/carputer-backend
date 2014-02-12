@@ -52,30 +52,32 @@ namespace CarMediaServer
 		{
 			while (true)
 			{
+				INetworkNotification[] notifications;
 				lock (_notificationQueue)
 				{
-					foreach (INetworkNotification notification in _notificationQueue)
-					{
-						try
-						{
-							List<Exception> exceptions = new List<Exception> ();
-							ClientConnection[] clients = Clients;
-							Logger.Debug ("Sending notification " + notification.GetType().Name + " to all clients");
-							foreach (ClientConnection client in clients)
-								try {
-									Logger.Debug ("Sending notification " + notification.GetType ().Name + " to client " + client.GetHashCode ()); 
-									((NotificationClientConnection)client).SendNotification (notification);
-								} catch (Exception ex) {
-									exceptions.Add (ex);
-								}
-							if (exceptions.Count > 0)
-								throw new AggregateException (exceptions.ToArray ());
-						}
-						catch
-						{
-						}
-					}
+					notifications = _notificationQueue.ToArray();
 					_notificationQueue.Clear();
+				}
+				foreach (INetworkNotification notification in notifications)
+				{
+					try
+					{
+						List<Exception> exceptions = new List<Exception> ();
+						ClientConnection[] clients = Clients;
+						Logger.Debug ("Sending notification " + notification.GetType().Name + " to all clients");
+						foreach (ClientConnection client in clients)
+							try {
+								Logger.Debug ("Sending notification " + notification.GetType ().Name + " to client " + client.GetHashCode ()); 
+								((NotificationClientConnection)client).SendNotification (notification);
+							} catch (Exception ex) {
+								exceptions.Add (ex);
+							}
+						if (exceptions.Count > 0)
+							throw new AggregateException (exceptions.ToArray ());
+					}
+					catch
+					{
+					}
 				}
 
 				Thread.Sleep(50);

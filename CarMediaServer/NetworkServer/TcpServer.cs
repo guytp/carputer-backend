@@ -57,26 +57,41 @@ namespace CarMediaServer
         /// The port to listen on.
         /// </param>
         public TcpServer(int port)
-        {
-            // Begin listening for connections
-            _listener = new TcpListener(IPAddress.Any, port);
-            _listener.Start();
+		{
+			int count = 0;
+			while (true)
+			{
+				try
+				{
+					// Begin listening for connections
+					_listener = new TcpListener(IPAddress.Any, port);
+					_listener.Start();
 
-            // Start a new background thread to accept incoming connections
-            string name = GetType().Name;
-            _acceptInboundThread = new Thread(new ThreadStart(AcceptInboundConnectionThread))
-            {
-                Name = name + " Accept Inbound TCP",
-                IsBackground = false
-            };
-            _acceptInboundThread.Start();
+					// Start a new background thread to accept incoming connections
+					string name = GetType().Name;
+					_acceptInboundThread = new Thread(new ThreadStart(AcceptInboundConnectionThread))
+		            {
+		                Name = name + " Accept Inbound TCP",
+		                IsBackground = false
+		            };
+					_acceptInboundThread.Start();
 
-            // Start a new thread to handle disconnected clients
-            _reclaimDisconnectThread = new Thread(new ThreadStart(ReclaimDisconnectedClientsThread)) {
-                Name = name + "Reclaim Disconnected Clients",
-                IsBackground = false
-            };
-            _reclaimDisconnectThread.Start();
+					// Start a new thread to handle disconnected clients
+					_reclaimDisconnectThread = new Thread(new ThreadStart(ReclaimDisconnectedClientsThread)) {
+		                Name = name + "Reclaim Disconnected Clients",
+		                IsBackground = false
+		            };
+					_reclaimDisconnectThread.Start();
+					break;
+				}
+				catch
+				{
+					count++;
+					if (count > 3)
+						throw;
+					Thread.Sleep(1000);
+				}
+			}
         }
 
         /// <summary>

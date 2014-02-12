@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace CarMediaServer
 {
@@ -8,6 +9,11 @@ namespace CarMediaServer
 	/// </summary>
 	public static class Controller
 	{
+		/// <summary>
+		/// Defines the serial number of the device.
+		/// </summary>
+		private static string _serialNumber;
+
 		/// <summary>
 		/// Gets or sets the application-wide instance of the command network server.
 		/// </summary>
@@ -32,5 +38,42 @@ namespace CarMediaServer
 		/// Gets or sets the application-wide instance of the mount manager.
 		/// </summary>
 		public static MountManager MountManager { get; set; }
+
+		public static AudioArtworkDiscoverer AudioArtworkDiscoverer { get; set; }
+
+		/// <summary>
+		/// Gets the serial number of the device.
+		/// </summary>
+		public static string SerialNumber
+		{
+			get
+			{
+				if (!string.IsNullOrEmpty(_serialNumber))
+					return _serialNumber;
+
+				// Attempt to read from value stored on disk
+				const string filename = "/etc/carputer/serialnumber";
+				if (File.Exists(filename))
+				{
+					string[] lines = File.ReadAllLines(filename);
+					if (lines.Length > 0)
+					{
+						if (!string.IsNullOrWhiteSpace(lines[0]))
+						{
+							_serialNumber = lines[0];
+							return _serialNumber;
+						}
+					}
+				}
+
+				// We need to create a new serial number and store it to disk.  If this fails we should
+				// throw an exception
+				if (!Directory.Exists(Path.GetDirectoryName(filename)))
+					Directory.CreateDirectory(Path.GetDirectoryName(filename));
+				_serialNumber = Guid.NewGuid().ToString().Replace("-", "").ToLower();
+				File.WriteAllText(filename, _serialNumber);
+				return _serialNumber;
+			}
+		}
 	}
 }

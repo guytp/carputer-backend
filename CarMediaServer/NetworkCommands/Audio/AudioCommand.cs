@@ -28,6 +28,7 @@ namespace CarMediaServer
             Commands.Add((ushort)AudioCommands.PlaylistNext, typeof(EmptyCommand));
             Commands.Add((ushort)AudioCommands.ToggleRepeatAll, typeof(EmptyCommand));
             Commands.Add((ushort)AudioCommands.ToggleShuffle, typeof(EmptyCommand));
+            Commands.Add((ushort)AudioCommands.ArtworkGet, typeof(ArtworkGet));
         }
     }
 }

@@ -3,6 +3,9 @@ using System.Threading;
 using Newtonsoft.Json;
 using System.Net.Sockets;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace CarMediaServer
 {
@@ -43,13 +46,18 @@ namespace CarMediaServer
 		/// Gets the hostname of this machine.
 		/// </summary>
 		public string Hostname { get { return Environment.MachineName; } }
+
+		/// <summary>
+		/// Gets the serial number of this machine.
+		/// </summary>
+		public string SerialNumber { get { return Controller.SerialNumber; } }
 		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Create a new instance of this class.
 		/// </summary>
-		public DiscoveryBroadcaster (bool audioSupport, ushort commandPort, ushort notificationPort)
+		public DiscoveryBroadcaster(bool audioSupport, ushort commandPort, ushort notificationPort)
 		{
 			AudioSupport = audioSupport;
 			CommandPort = commandPort;
@@ -103,39 +111,67 @@ namespace CarMediaServer
 		{
 			while (true) {
 				try {
+					// Get our broadcast address - if we don't have one, wait and try again
+					IPAddress broadcast = GetPrimaryBroadcast();
+					if (broadcast == null)
+					{
+						Thread.Sleep(100);
+						continue;
+					}
+
 					// Create JSON for broadcast
 					byte[] json = System.Text.Encoding.UTF8.GetBytes (JsonConvert.SerializeObject (this));
 
 					// Loop as long as we're running
-					while (_isThreadRunning) {
-						// Create the socket
-						Socket s = new Socket (AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-						IPAddress ip = IPAddress.Parse ("239.42.0.1");
-						s.SetSocketOption (SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption (ip));
-						s.SetSocketOption (SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, 2);
-						IPEndPoint ipep = new IPEndPoint (ip, 4200);
-						s.Connect (ipep);
-
-						// Write to socket
-						s.Send (json, json.Length, SocketFlags.None);
-
-						// Close socket
-						s.Close ();
-						s.Dispose ();
-
-						// Wait for next loop
-						Thread.Sleep (1000);
+					using (UdpClient client = new UdpClient())
+					{
+						IPEndPoint ip = new IPEndPoint(broadcast, 4200);
+						client.EnableBroadcast = true;
+						client.DontFragment = true;
+						client.Send(json, json.Length, ip);
 					}
-					if (!_isThreadRunning)
-						break;
 				} catch (Exception ex) {
+					Console.WriteLine("Send exception in broadcast"+ ex);
 					System.Diagnostics.Trace.WriteLine (ex.ToString ());
 				}
+				if (!_isThreadRunning)
+					break;
+
+				// Wait for next loop
+				DateTime endTime = DateTime.UtcNow.AddSeconds(0.5);
+				while (DateTime.UtcNow < endTime)
+					Thread.Sleep (10);
 			}
 
 			// Mark as no longer running
 			_broadcastThread = null;
 		}
 		#endregion
+
+		private static IPAddress GetPrimaryBroadcast()
+		{
+			foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+			{
+				if (netInterface.OperationalStatus != OperationalStatus.Up)
+					continue;
+				IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+				foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+				{
+					if ((addr.Address.AddressFamily == AddressFamily.InterNetwork) && (addr.Address.ToString() != "127.0.0.1"))
+					{
+						byte[] ipBytes = addr.Address.GetAddressBytes();
+						byte[] maskBytes = IPInfoTools.GetIPv4Mask(netInterface.Name).GetAddressBytes();
+					    byte[] broadcastIPBytes = new byte[4];
+					    for (int i = 0; i < 4; i++)
+					    {
+					        byte inverseByte = (byte)~ maskBytes[i];
+					        broadcastIPBytes[i] = (byte)(ipBytes[i] | inverseByte);
+					    }
+					    return new IPAddress(broadcastIPBytes);
+					}
+				}
+			}
+			return null;
+		}
 	}
 }

@@ -45,10 +45,15 @@
 		/// Indicates a command to toggle the shuffle state.
 		/// </summary>
 		ToggleShuffle = 0x07,
-
+		
 		/// <summary>
 		/// Indicates a command to toggle the repeat all status.
 		/// </summary>
-		ToggleRepeatAll = 0x08
+		ToggleRepeatAll = 0x08,
+
+		/// <summary>
+		/// Indicates a command to get one or more items of artwork.
+		/// </summary>
+		ArtworkGet = 0x09
     }
 }

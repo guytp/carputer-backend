@@ -143,8 +143,12 @@ namespace CarMediaServer
 		/// </summary>
 		private void StorageDeviceDetectionThread()
 		{
+			int errorCount = 0;
+			DateTime lastErrorTime = new DateTime(0);
 			while (IsStarted && !IsStopping)
 			{
+				try
+				{
 				// Determine all current available devices by UUID for those that are not in ignore list
 				string[] allDevices = Directory.GetFiles ("/dev/disk/by-uuid");
 				List<string> allDeviceNames = new List<string>();
@@ -216,6 +220,16 @@ namespace CarMediaServer
 
 				// Wait for next loop
 				Thread.Sleep(500);
+				}
+				catch
+				{
+					if (DateTime.UtcNow.Subtract(lastErrorTime).TotalSeconds > 30)
+						errorCount = 0;
+					errorCount++;
+					if (errorCount >= 5)
+						throw;
+					lastErrorTime = DateTime.UtcNow;
+				}
 			}
 
 			_storageDeviceDetectionThread = null;

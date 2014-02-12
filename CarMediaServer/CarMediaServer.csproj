@@ -44,6 +44,13 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\Downloads\Json50r8\Bin\Net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="taglib-sharp">
+      <HintPath>..\taglib-sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -102,6 +109,16 @@
     <Compile Include="NetworkServer\CommandProcessors\PlaylistPreviousCommandProcessor.cs" />
     <Compile Include="NetworkServer\CommandProcessors\ToggleShuffleCommandProcessor.cs" />
     <Compile Include="NetworkServer\CommandProcessors\ToggleRepeatCommandProcessor.cs" />
+    <Compile Include="NetworkCommands\Audio\AudioLibraryUpdateNotification.cs" />
+    <Compile Include="DataObjects\AudioArtwork.cs" />
+    <Compile Include="Data\AudioArtworkFactory.cs" />
+    <Compile Include="NetworkCommands\Audio\ArtworkGet.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\ArtworkGetResponse.cs" />
+    <Compile Include="NetworkServer\CommandProcessors\ArtworkGetCommandProcessor.cs" />
+    <Compile Include="Audio\AudioArtworkDiscoverer.cs" />
+    <Compile Include="Audio\LastFmClient.cs" />
+    <Compile Include="NetworkCommands\Audio\AudioArtworkAvailableNotification.cs" />
+    <Compile Include="NetworkServer\IpInfoTools.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

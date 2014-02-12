@@ -79,6 +79,14 @@ namespace CarMediaServer
         [DataPropertyMapping]
 		[JsonIgnore]
 		public DateTime LastSeen { get; set; }
+
+		/// <summary>
+		/// Gets or sets the date artwork was last searched for with this audio file or
+		/// null if artwork has never successfully been checked.
+		/// </summary>
+		[DataPropertyMappingAttribute]
+		[JsonIgnore]
+		public DateTime? ArtworkSearchDate { get; set; }
 		#endregion
 
 		/// <summary>
@@ -100,6 +108,21 @@ namespace CarMediaServer
 				"RelativePath  = {6}" + Environment.NewLine +
 				"LastSeen      = {7}" + Environment.NewLine +
 				"--------------------------------------------------------------------------------", Artist, Title, TrackNumber, Album, Duration, DeviceUuid, RelativePath, LastSeen);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		// Only compares ID3 tag changes and ignores everything else
+		public override bool Equals(object obj)
+		{
+			AudioFile audioFile = this;
+			AudioFile existing = obj as AudioFile;
+			if (existing == null)
+				return false;
+			return (audioFile.Album == existing.Album && audioFile.Artist == existing.Artist && audioFile.Duration == existing.Duration && audioFile.RelativePath == existing.RelativePath && audioFile.Title == existing.Title && audioFile.TrackNumber == existing.TrackNumber);
 		}
 	}
 }

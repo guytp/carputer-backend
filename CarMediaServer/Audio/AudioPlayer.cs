@@ -565,14 +565,21 @@ namespace CarMediaServer
 							_readyForNextCommand = false;
 							_retryLastCommand = false;
 						}
-						_process.StandardInput.WriteLine(command);
+						_process.StandardInput.Write(command + "\n");
+						_process.StandardInput.Flush();
 
 						// If we become ready for next command and retry last command is false we break out
 						// otherwise we do the same command again
-						while (!_readyForNextCommand)
-							Thread.Sleep(50);
-						if (!_retryLastCommand)
-							break;
+						while (true)
+						{
+							lock (_locker)
+								if (_readyForNextCommand)
+									break;
+							Thread.Sleep(250);
+						}
+						lock (_locker)
+							if (!_retryLastCommand)
+								break;
 					}
 				}
 			}
@@ -669,11 +676,63 @@ namespace CarMediaServer
 					if (components [0] != "@F")
 						Logger.Info(data);
 				}
+
+				Thread.Sleep(150);
 			}
 		}
 		#endregion
 
 		#region Helper Methods
+		/// <summary>
+		/// This method notifies the audio player that a device is offline.  At this point the
+		/// audio player should update its playlist to remove any tracks that were on the device.
+		/// </summary>
+		/// <param name='uuid'>
+		/// The UUID of the removed device.
+		/// </param>
+		public void NotifyDeviceOffline(string uuid)
+		{
+			bool jumpToIndex = false;
+			bool stop = false;
+			lock (_playlist)
+			{
+				List<AudioFile> toRemove = new List<AudioFile>();
+				AudioFile currentItem = _playlistLocation >= _playlist.Count ? null : _playlist[_playlistLocation];
+				foreach (AudioFile file in _playlist)
+					if (file.DeviceUuid == uuid)
+						toRemove.Add(file);
+				foreach (AudioFile file in toRemove)
+					_playlist.Remove(file);
+
+				// Now we need to reconsolidate where we are in the playlist
+				if (_playlist.Count == 0)
+				{
+					_playlistLocation = 0;
+					stop = true;
+				}
+				else if ((currentItem != null) && (toRemove.Contains(currentItem)))
+				{
+					for (int i = 0; i < _playlist.Count; i++)
+						if (_playlist[i] == currentItem)
+						{
+							_playlistLocation = i;
+							break;
+						}
+				}
+				else
+				{
+					// Current item has been removed or item was not set, so we chose highest we can near it
+					_playlistLocation = _playlist.Count >= _playlistLocation ? _playlist.Count : _playlistLocation;
+					jumpToIndex = true;
+				}
+			}
+			if (stop)
+				Stop();
+			else if (jumpToIndex)
+				PlayItemInPlaylist(_playlistLocation);
+		}
+
+
 		/// <summary>
 		/// Updates the status of this object and if it has changed since it was last called
 		/// send out a network notification to all connected clients.
@@ -711,7 +770,7 @@ namespace CarMediaServer
 				Controller.NotificationNetworkServer.SendNotification(statusNotification);
 
 				// Wait for next loop
-				Thread.Sleep(200);
+				Thread.Sleep(500);
 			}
 		}
 		#endregion

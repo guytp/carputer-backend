@@ -33,6 +33,7 @@ namespace CarMediaServer
             commands[category].Add((ushort)AudioCommands.PlaylistPrevious, typeof(PlaylistPreviousCommandProcessor));
             commands[category].Add((ushort)AudioCommands.ToggleRepeatAll, typeof(ToggleRepeatCommandProcessor));
             commands[category].Add((ushort)AudioCommands.ToggleShuffle, typeof(ToggleShuffleCommandProcessor));
+            commands[category].Add((ushort)AudioCommands.ArtworkGet, typeof(ArtworkGetCommandProcessor));
 
 
 			/*

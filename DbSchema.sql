@@ -1,13 +1,32 @@
+DROP DATABASE IF EXISTS carputer;
+
+CREATE DATABASE carputer
+  DEFAULT CHARACTER SET utf8
+  DEFAULT COLLATE utf8_general_ci;
+
+
+use carputer;
+
 CREATE TABLE AudioFile
 (
 	AudioFileId INT NOT NULL AUTO_INCREMENT,
-	Artist VARCHAR(1000) NULL,
-	Title VARCHAR(1000) NULL,
+	Artist VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+	Title VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
 	TrackNumber INT NULL,
-	Album VARCHAR(1000) NULL,
+	Album VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
 	Duration INT NULL,
-	DeviceUuid VARCHAR(100) NOT NULL,
-	RelativePath VARCHAR(2000) NOT NULL,
+	DeviceUuid VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+	RelativePath VARCHAR(2000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+	ArtworkSearchDate DATETIME NULL,
 	LastSeen DATETIME NOT NULL,
 	PRIMARY KEY (AudioFileId)
-)
+);
+
+
+CREATE TABLE AudioArtwork
+(
+	AudioArtworkId INT NOT NULL AUTO_INCREMENT,
+	Artist VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+	Album VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+	PRIMARY KEY (AudioArtworkId)
+);

@@ -36,10 +36,10 @@ namespace CarMediaServer
 			string[] toks = json.Split(new string[] { "\"ReplaceCurrentQueue\"" }, StringSplitOptions.None);
 			if (toks.Length != 2)
 				throw new Exception("Invalid toks count at ReplaceCurrentQueue");
-			toks = toks[1].Split(new char[] { ' ', ':', ',' }, StringSplitOptions.RemoveEmptyEntries);
+			toks = toks[1].Split(new char[] { ' ', ':', ',', '}', '"' }, StringSplitOptions.RemoveEmptyEntries);
 			bool replaceCurrentQueue;
 			if (!bool.TryParse(toks[0], out replaceCurrentQueue))
-				throw new Exception("Error parsing replaceCurrentQueue");
+				throw new Exception("Error parsing replaceCurrentQueue - got " + json);
 			toks = json.Split(new string[] { "\"AudioFileIds\"" }, StringSplitOptions.None);
 			if (toks.Length != 2)
 				throw new Exception("Invalid toks count at AudioFileIds");

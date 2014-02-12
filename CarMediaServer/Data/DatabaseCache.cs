@@ -216,13 +216,27 @@ namespace CarMediaServer
         /// </param>
         internal void InvalidateCache(TPrimaryKey primaryKey)
         {
+			InvalidateCache(new [] { primaryKey });
+        }
+
+        /// <summary>
+        /// Invalidates a several objects in the cache.
+        /// </summary>
+        /// <param name="primaryKeys">
+        /// The primary keys of the objects to remove from the cache.
+        /// </param>
+        internal void InvalidateCache(IEnumerable<TPrimaryKey> primaryKeys)
+        {
             lock (_lockObject)
             {
-                Logger.Debug("Invalidating " + _type + " from cache using PK " + primaryKey); 
-                if (!_cacheByPk.ContainsKey(primaryKey))
-                    return;
-                _cachedObjects.Remove(_cacheByPk[primaryKey]);
-                _cacheByPk.Remove(primaryKey);
+				foreach (TPrimaryKey primaryKey in primaryKeys)
+				{
+                	Logger.Debug("Invalidating " + _type + " from cache using PK " + primaryKey); 
+                	if (!_cacheByPk.ContainsKey(primaryKey))
+	                    continue;
+                	_cachedObjects.Remove(_cacheByPk[primaryKey]);
+                	_cacheByPk.Remove(primaryKey);
+				}
             }
         }
     }
