@@ -165,26 +165,28 @@ namespace CarMediaServer
 
                 // Create the command and execute it to insert data
                 Logger.Debug(_type + " generating SQL statement for query");
-                MySqlCommand command = new MySqlCommand(GenerateSelectStatement(), conn);
-                Logger.Debug(_type + " executing query");
-                MySqlDataReader reader = command.ExecuteReader();
-                Logger.Debug(_type + " processing rows");
-                while (reader.Read())
-                {
-                    TDbObject obj = (TDbObject)Activator.CreateInstance(_objectType);
-                    int i = 0;
-                    foreach (PropertyInfo property in _dataObjectInformation.Properties)
-                    {
-                        object value = reader.GetValue(i);
-                        if (value == DBNull.Value)
-                            value = null;
-                        if (property.PropertyType == typeof(bool))
-                            value = Convert.ToBoolean(value);
-                        property.SetValue(obj, value, null);
-                        i++;
-                    }
-                    objects.Add(obj);
-                }
+                using (MySqlCommand command = new MySqlCommand(GenerateSelectStatement(), conn))
+				{
+	                Logger.Debug(_type + " executing query");
+	                MySqlDataReader reader = command.ExecuteReader();
+	                Logger.Debug(_type + " processing rows");
+	                while (reader.Read())
+	                {
+	                    TDbObject obj = (TDbObject)Activator.CreateInstance(_objectType);
+	                    int i = 0;
+	                    foreach (PropertyInfo property in _dataObjectInformation.Properties)
+	                    {
+	                        object value = reader.GetValue(i);
+	                        if (value == DBNull.Value)
+	                            value = null;
+	                        if (property.PropertyType == typeof(bool))
+	                            value = Convert.ToBoolean(value);
+	                        property.SetValue(obj, value, null);
+	                        i++;
+	                    }
+	                    objects.Add(obj);
+	                }
+				}
                 Logger.Debug(_type + " rows all processed from data reader");
             }
             finally
